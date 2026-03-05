@@ -60,6 +60,7 @@ public class RutaDetalleFragment extends Fragment implements OnMapReadyCallback 
         return inflater.inflate(R.layout.fragment_ruta_detalle, container, false);
     }
 
+    //Metodo para extraer los destinos y el origen de la clase Inicio Fragment
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -69,7 +70,7 @@ public class RutaDetalleFragment extends Fragment implements OnMapReadyCallback 
         tvTiempoCaminata = view.findViewById(R.id.tvTiempoCaminata);
         btnFinalizarViaje = view.findViewById(R.id.btnFinalizarViaje);
 
-        // Extraemos LA LISTA de destinos de la mochila
+        // Extraemos LA LISTA de destinos
         if (getArguments() != null) {
             listaDestinos = getArguments().getStringArrayList("LISTA_DESTINOS");
             origenLat = getArguments().getDouble("ORIGEN_LAT", 0.0);

@@ -75,11 +75,8 @@ public class MainActivity extends AppCompatActivity {
     private void sincronizarRutasConFirebase() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // ¡CORREGIDO! Usamos directamente el método getApi() de tu RetrofitClient
+        // Usamos directamente el método getApi() de tu RetrofitClient
         TransporteApi api = RetrofitClient.getApi();
-
-        // OJO: Asegúrate de que el método dentro de tu interfaz TransporteApi se llame "obtenerRutas"
-        // Si se llama diferente (ej: getRutas(), listarRutas()), cámbialo aquí.
         Call<List<Ruta>> call = api.obtenerRutas();
 
         call.enqueue(new Callback<List<Ruta>>() {

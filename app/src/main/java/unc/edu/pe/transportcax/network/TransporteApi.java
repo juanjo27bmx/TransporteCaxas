@@ -9,5 +9,5 @@ public interface TransporteApi {
 
     // Aquí solo pedimos la lista de rutas
     @GET("rutas")
-    Call<List<Ruta>> obtenerRutas();
+    Call<List<Ruta>> obtenerRutas();//obtenemos una lista de objetos ruta
 }
