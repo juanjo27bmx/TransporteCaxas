@@ -2,6 +2,9 @@ package unc.edu.pe.transportcax.model;
 
 import com.google.firebase.firestore.ServerTimestamp;
 import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class Alerta {
     private String lugar;
@@ -13,7 +16,6 @@ public class Alerta {
     @ServerTimestamp
     private Date timestamp;
 
-    // 1. REGLA DE ORO: Constructor vacío obligatorio para Firebase
     public Alerta() {
     }
 
@@ -46,6 +48,24 @@ public class Alerta {
         if (timestamp == null) {
             return "Justo ahora";
         }
-        return "Hace un momento";
+        return formatoDate(timestamp);
+    }
+    //Metodo para dar formato a la fecha
+    private String formatoDate(Date fechaAlerta){
+        Date ahora = new Date();
+
+        // Calculamos cuántas horas han pasado entre ahorita y la alerta
+        long diferenciaMillis = ahora.getTime() - fechaAlerta.getTime();
+        long horasPasadas = TimeUnit.MILLISECONDS.toHours(diferenciaMillis);
+
+        if (horasPasadas < 24) {
+            // Si pasaron menos de 24 horas, mostramos solo la hora (Ej: "14:30")
+            SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            return formatoHora.format(fechaAlerta);
+        } else {
+            // Si pasó más de 1 día, mostramos día y mes (Ej: "05 mar")
+            SimpleDateFormat formatoFecha = new SimpleDateFormat("dd MMM", Locale.getDefault());
+            return formatoFecha.format(fechaAlerta);
+        }
     }
 }
