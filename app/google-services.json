@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "753009811977",
+    "project_id": "transportcaxaplicadaiii",
+    "storage_bucket": "transportcaxaplicadaiii.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:753009811977:android:f22a33b7b4de6d8fa60ed8",
+        "android_client_info": {
+          "package_name": "unc.edu.pe.transportcax"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "753009811977-gquq6geara5ia0gqevnjkn4oe81f10pn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "unc.edu.pe.transportcax",
+            "certificate_hash": "c98689667d1a9a54ed436b5db9b5bb396b7851f5"
+          }
+        },
+        {
+          "client_id": "753009811977-tjj7mcjmm2n3p9euht41uhp8mesnuvk6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "unc.edu.pe.transportcax",
+            "certificate_hash": "79c2027974165a9d670e258b2f829666d51681ed"
+          }
+        },
+        {
+          "client_id": "753009811977-7a1vfcopl0bchrlq1gebad67lpikf3dv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIre-NLzOAR6Sot86dEhGp0Nlm9nEb_Sc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "753009811977-7a1vfcopl0bchrlq1gebad67lpikf3dv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

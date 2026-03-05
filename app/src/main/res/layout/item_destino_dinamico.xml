@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_marginBottom="8dp">
+
+    <EditText
+        android:id="@+id/etDestinoDinamico"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:background="@drawable/fondo_input"
+        android:drawableStart="@drawable/ic_alerta"
+        android:drawableTint="#F44336"
+        android:drawablePadding="12dp"
+        android:hint="Siguiente parada"
+        android:paddingStart="12dp"
+        android:singleLine="true"/>
+
+    <ImageButton
+        android:id="@+id/btnQuitarDestino"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:color="#F44336"
+        android:contentDescription="Quitar parada"/>
+</LinearLayout>

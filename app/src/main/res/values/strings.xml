@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TransportCax</string>
+    <string name="google_maps_key" translatable="false">AIzaSyA6YWSF2OrRH5aJEk3MvEM8U0pw7IynAiI</string>
+</resources>

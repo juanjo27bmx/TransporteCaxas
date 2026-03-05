@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:id="@+id/tvTituloCalificar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Calificar Ruta"
+        android:textColor="#333333"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🛡️ Seguridad en el viaje:"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp"/>
+    <RatingBar
+        android:id="@+id/ratingSeguridad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1.0"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="⏱️ Tiempo y puntualidad:"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp"/>
+    <RatingBar
+        android:id="@+id/ratingTiempo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1.0"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/etComentarioRuta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minLines="2"
+        android:hint="Deja un comentario (opcional)..."
+        android:background="#F5F5F5"
+        android:padding="16dp"
+        android:layout_marginBottom="24dp" />
+
+    <Button
+        android:id="@+id/btnEnviarCalificacion"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:text="Enviar Calificación"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="#1A73E8"
+        android:textColor="#FFFFFF" />
+
+</LinearLayout>
