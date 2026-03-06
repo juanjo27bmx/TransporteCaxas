@@ -148,13 +148,12 @@ public class RutasFragment extends Fragment {
     private void filtrarLista(String textoBuscado) {
         List<Ruta> listaFiltrada = new ArrayList<>();
         String query = textoBuscado.toLowerCase().trim();
-
+        //Validacion por si este vacip
         if (query.isEmpty()) {
             rutaAdapter.setRutas(listaOriginalDeRutas);
             return;
         }
-
-        // Intentamos convertir el texto a número para filtrar por costo máximo
+        // convertir el texto a número para filtrar por costo máximo
         Double precioMaximo = null;
         try {
             precioMaximo = Double.parseDouble(query);
@@ -173,7 +172,7 @@ public class RutasFragment extends Fragment {
             }
         }
 
-        // Actualizamos el adaptador con la nueva lista filtrada
+        // Actualizamos el adaptador
         rutaAdapter.setRutas(listaFiltrada);
     }
 }
