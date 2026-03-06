@@ -147,10 +147,28 @@ public class RutasFragment extends Fragment {
 
     private void filtrarLista(String textoBuscado) {
         List<Ruta> listaFiltrada = new ArrayList<>();
+        String query = textoBuscado.toLowerCase().trim();
+
+        if (query.isEmpty()) {
+            rutaAdapter.setRutas(listaOriginalDeRutas);
+            return;
+        }
+
+        // Intentamos convertir el texto a número para filtrar por costo máximo
+        Double precioMaximo = null;
+        try {
+            precioMaximo = Double.parseDouble(query);
+        } catch (NumberFormatException ignored) {}
 
         for (Ruta ruta : listaOriginalDeRutas) {
-            // Validación de seguridad para que no se caiga la app si el nombre llega nulo
-            if (ruta.getNombreRuta() != null && ruta.getNombreRuta().toLowerCase().contains(textoBuscado.toLowerCase())) {
+            String nombre = (ruta.getNombreRuta() != null) ? ruta.getNombreRuta().toLowerCase() : "";
+            double costoRuta = ruta.getCostoViaje();
+
+            boolean coincideNombre = nombre.contains(query);
+            // Si el texto es numérico, comparamos si el costo es menor o igual al ingresado
+            boolean coincidePrecio = (precioMaximo != null && costoRuta <= precioMaximo);
+
+            if (coincideNombre || coincidePrecio) {
                 listaFiltrada.add(ruta);
             }
         }
