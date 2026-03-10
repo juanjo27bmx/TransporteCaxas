@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -45,6 +46,7 @@ import unc.edu.pe.transportcax.model.DirectionsResponse;
 import unc.edu.pe.transportcax.model.Paradero;
 import unc.edu.pe.transportcax.model.Ruta;
 import unc.edu.pe.transportcax.network.GoogleMapsApi;
+import unc.edu.pe.transportcax.view.adapters.CalificacionAdapter;
 
 public class RutaCompletaFragment extends Fragment implements OnMapReadyCallback {
 
@@ -54,6 +56,9 @@ public class RutaCompletaFragment extends Fragment implements OnMapReadyCallback
 
     private TextView tvTituloRutaMapa;
     private FirebaseFirestore db;
+    private RecyclerView recyclerCalificaciones;
+    private CalificacionAdapter calificacionAdapter;
+    private TextView tvPromedioEstrellas;
 
     @Nullable
     @Override
@@ -75,19 +80,23 @@ public class RutaCompletaFragment extends Fragment implements OnMapReadyCallback
             colorRuta = getArguments().getString("COLOR_RUTA", "#1A73E8");
             tvTituloRutaMapa.setText(nombreRutaSeleccionada);
         }
-
+        cargarCalificaciones();
         btnVolver.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         // AQUÍ ENLAZAMOS EL BOTÓN DE LA ESTRELLA
         FloatingActionButton fabCalificar = view.findViewById(R.id.fabCalificarRuta);
         fabCalificar.setOnClickListener(v -> {
-            // Verificar si el usuario está logeado con Google
             FirebaseUser usuarioActual = FirebaseAuth.getInstance().getCurrentUser();
 
             if (usuarioActual != null) {
                 mostrarDialogoCalificacion(usuarioActual);
             } else {
-                Toast.makeText(requireContext(), "🔒 Inicia sesión en la pestaña Perfil para calificar esta ruta.", Toast.LENGTH_LONG).show();
+                // AQUÍ CREAMOS EL EMERGENTE ELEGANTE EN LUGAR DEL TOAST
+                new android.app.AlertDialog.Builder(requireContext())
+                        .setTitle("⚠️ Inicio de sesión requerido")
+                        .setMessage("Para mantener la veracidad de las calificaciones en nuestra comunidad, necesitas iniciar sesión antes de publicar tu opinión.\n\nVe a la pestaña 'Perfil' para conectarte rápidamente con Google.")
+                        .setPositiveButton("Entendido", (dialog, which) -> dialog.dismiss())
+                        .show();
             }
         });
 
@@ -96,6 +105,52 @@ public class RutaCompletaFragment extends Fragment implements OnMapReadyCallback
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
+    }
+
+    private void cargarCalificaciones() {
+        tvPromedioEstrellas = getView().findViewById(R.id.tvPromedioEstrellas);
+        recyclerCalificaciones = getView().findViewById(R.id.recyclerCalificaciones);
+
+        // Inicializamos el Adapter vacío
+        calificacionAdapter = new CalificacionAdapter(new java.util.ArrayList<>());
+        recyclerCalificaciones.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(requireContext()));
+        recyclerCalificaciones.setAdapter(calificacionAdapter);
+
+        // Escuchamos a Firebase
+        db.collection("calificaciones_rutas")
+                .whereEqualTo("rutaID", idRuta) // Solo las calificaciones de ESTA combi
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        tvPromedioEstrellas.setText("⭐ Error al cargar.");
+                        return;
+                    }
+
+                    if (value != null && !value.isEmpty()) {
+                        java.util.List<Calificacion> lista = new java.util.ArrayList<>();
+                        float sumaTotal = 0;
+
+                        for (com.google.firebase.firestore.QueryDocumentSnapshot doc : value) {
+                            Calificacion calif = doc.toObject(Calificacion.class);
+                            lista.add(calif);
+
+                            // Promediamos Seguridad y Tiempo para esta persona
+                            float promedioUsuario = (calif.getPuntajeSeguridad() + calif.getPuntajeTiempo()) / 2.0f;
+                            sumaTotal += promedioUsuario;
+                        }
+
+                        // Calculamos el promedio de todos
+                        float promedioGlobal = sumaTotal / lista.size();
+
+                        // Mostramos el texto en la parte colapsada
+                        tvPromedioEstrellas.setText(String.format(java.util.Locale.getDefault(), "⭐ %.1f de 5 (%d opiniones)", promedioGlobal, lista.size()));
+
+                        // Mandamos la lista al adaptador para que llene el menú deslizable
+                        calificacionAdapter.setCalificaciones(lista);
+                    } else {
+                        tvPromedioEstrellas.setText("⭐ Sin calificaciones. ¡Sé el primero!");
+                        calificacionAdapter.setCalificaciones(new java.util.ArrayList<>()); // Lista vacía
+                    }
+                });
     }
 
     @Override
