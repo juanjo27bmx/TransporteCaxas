@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import unc.edu.pe.transportcax.view.adapters.RutaAdapter;
 public class RutasFragment extends Fragment {
 
     private RecyclerView recyclerRutas;
+    private ProgressBar pbRutasMain; // <-- NUEVA VARIABLE DEL CARGADOR
     private RutaAdapter rutaAdapter;
 
     // Elementos de la cabecera
@@ -56,6 +58,7 @@ public class RutasFragment extends Fragment {
 
         // Enlazamos las vistas
         recyclerRutas = view.findViewById(R.id.recycler_rutas);
+        pbRutasMain = view.findViewById(R.id.pbRutasMain); // <-- ENLAZAMOS EL CARGADOR
         searchViewRutas = view.findViewById(R.id.searchViewRutas);
         tvTituloRutas = view.findViewById(R.id.tvTituloRutas);
 
@@ -89,7 +92,6 @@ public class RutasFragment extends Fragment {
         configurarBuscadorYAnimacion();
 
         // 2. LEEMOS DESDE DE FIREBASE (OFFLINE/ONLINE)
-        // Reemplazamos la lectura del MapViewModel por la base de datos de Firestore
         cargarRutasDesdeFirebase();
     }
 
@@ -98,6 +100,7 @@ public class RutasFragment extends Fragment {
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
                         Log.e("Firebase", "Error al cargar las rutas", error);
+                        pbRutasMain.setVisibility(View.GONE); // Ocultar cargador si hay error
                         return;
                     }
 
@@ -110,8 +113,15 @@ public class RutasFragment extends Fragment {
 
                         // Guardamos la lista original para que el buscador funcione
                         listaOriginalDeRutas = nuevasRutas;
-                        // Mostramos las rutas iniciales en la pantalla
+                        // Pasamos las rutas al adaptador
                         rutaAdapter.setRutas(nuevasRutas);
+
+                        // MAGIA DE LA V2.0: Ocultamos cargador y mostramos lista
+                        pbRutasMain.setVisibility(View.GONE);
+                        recyclerRutas.setVisibility(View.VISIBLE);
+
+                        // Añadimos una suave animación para que no aparezca de golpe
+                        recyclerRutas.scheduleLayoutAnimation();
 
                         if (nuevasRutas.isEmpty() && getContext() != null) {
                             Toast.makeText(getContext(), "Esperando rutas de la API...", Toast.LENGTH_SHORT).show();

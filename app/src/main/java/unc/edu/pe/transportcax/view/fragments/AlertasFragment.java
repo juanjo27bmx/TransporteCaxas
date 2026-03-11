@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -20,8 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-// Librerías de Firebase
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -38,14 +37,12 @@ import unc.edu.pe.transportcax.view.adapters.AlertaAdapter;
 public class AlertasFragment extends Fragment {
 
     private RecyclerView recyclerAlertas;
+    private ProgressBar pbAlertasMain;
     private AlertaAdapter alertaAdapter;
     private List<Alerta> listaAlertas;
 
-    // Herramientas de Firebase
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-
-    // Guardamos la referencia de la cajita de texto para poder pegarle la dirección del mapa
     private EditText etLugarActual;
 
     @Nullable
@@ -58,23 +55,20 @@ public class AlertasFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Inicializamos Firebase
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
         recyclerAlertas = view.findViewById(R.id.recycler_alertas);
+        pbAlertasMain = view.findViewById(R.id.pbAlertasMain);
         FloatingActionButton fabAgregar = view.findViewById(R.id.fabAgregarAlerta);
 
-        // Configuramos el RecyclerView
         recyclerAlertas.setLayoutManager(new LinearLayoutManager(getContext()));
         listaAlertas = new ArrayList<>();
         alertaAdapter = new AlertaAdapter(listaAlertas);
         recyclerAlertas.setAdapter(alertaAdapter);
 
-        // 2. Cargamos los datos reales desde la nube
         escucharAlertasDesdeFirebase();
 
-        // 3. Escucha cuando el mapa se cierra y atrapa la dirección
         getParentFragmentManager().setFragmentResultListener("requestKeyUbicacion", getViewLifecycleOwner(), (requestKey, bundle) -> {
             String direccionResultante = bundle.getString("DIRECCION_SELECCIONADA");
             if (etLugarActual != null) {
@@ -82,7 +76,6 @@ public class AlertasFragment extends Fragment {
             }
         });
 
-        // 4. Configurar el botón flotante con el candado de seguridad
         fabAgregar.setOnClickListener(v -> {
             FirebaseUser usuarioActual = mAuth.getCurrentUser();
             if (usuarioActual != null) {
@@ -99,6 +92,7 @@ public class AlertasFragment extends Fragment {
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
                         Log.e("Firebase", "Error al conectar con Firestore", error);
+                        if (pbAlertasMain != null) pbAlertasMain.setVisibility(View.GONE);
                         return;
                     }
 
@@ -109,6 +103,10 @@ public class AlertasFragment extends Fragment {
                             listaAlertas.add(alertaDescargada);
                         }
                         alertaAdapter.notifyDataSetChanged();
+
+                        if (pbAlertasMain != null) pbAlertasMain.setVisibility(View.GONE);
+                        if (recyclerAlertas != null) recyclerAlertas.setVisibility(View.VISIBLE);
+                        if (recyclerAlertas != null) recyclerAlertas.scheduleLayoutAnimation();
                     }
                 });
     }
@@ -118,19 +116,16 @@ public class AlertasFragment extends Fragment {
         View viewDialogo = getLayoutInflater().inflate(R.layout.dialog_agregar_alerta, null);
         dialog.setContentView(viewDialogo);
 
-        // Referencias a los campos del XML
         etLugarActual = viewDialogo.findViewById(R.id.etLugarAlerta);
-        ImageButton btnAbrirMapa = viewDialogo.findViewById(R.id.btnAbrirMapa); // Nuestro botón de GPS
+        ImageButton btnAbrirMapa = viewDialogo.findViewById(R.id.btnAbrirMapa);
         Spinner spinnerGravedad = viewDialogo.findViewById(R.id.spinnerGravedad);
         EditText etDescripcion = viewDialogo.findViewById(R.id.etDescripcionAlerta);
         Button btnPublicar = viewDialogo.findViewById(R.id.btnPublicarAlerta);
 
-        // Poblar el Spinner
         String[] opcionesGravedad = {"🟡 Leve (Tráfico lento)", "🟠 Moderado (Vía parcialmente cerrada)", "🔴 Grave (Choque / Cierre total)"};
         ArrayAdapter<String> adapterSpinner = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, opcionesGravedad);
         spinnerGravedad.setAdapter(adapterSpinner);
 
-        // ABRIR EL MAPA
         if (btnAbrirMapa != null) {
             btnAbrirMapa.setOnClickListener(v -> {
                 MapaUbicacionDialog mapaDialog = new MapaUbicacionDialog();
@@ -138,7 +133,6 @@ public class AlertasFragment extends Fragment {
             });
         }
 
-        // PUBLICAR EN LA NUBE
         btnPublicar.setOnClickListener(v -> {
             String lugar = etLugarActual.getText().toString().trim();
             String descripcion = etDescripcion.getText().toString().trim();
@@ -169,35 +163,5 @@ public class AlertasFragment extends Fragment {
         });
 
         dialog.show();
-    }
-
-    // INYECTAR DATOS DE PRUEBA
-    private void inyectarDatosDePrueba() {
-        Alerta alerta1 = new Alerta(
-                "Av. Atahualpa (Frente a la UNC)",
-                "🟡 Leve (Tráfico lento)",
-                "Mucha congestión vehicular por el horario de salida de los estudiantes. Avanza lento pero seguro.",
-                "Clever"
-        );
-
-        Alerta alerta2 = new Alerta(
-                "Av. Vía de Evitamiento (Óvalo Musical)",
-                "🔴 Grave (Choque / Cierre total)",
-                "Fuerte choque entre una combi y un auto particular. La vía está completamente bloqueada, tomar desvíos urgentes.",
-                "Juan Pérez"
-        );
-
-        Alerta alerta3 = new Alerta(
-                "Vía a Baños del Inca",
-                "🟠 Moderado (Vía parcialmente cerrada)",
-                "Trabajos de mantenimiento en el carril derecho. Hay maquinaria pesada en la zona trabajando.",
-                "Lidia Garay"
-        );
-
-        db.collection("alertas_trafico").add(alerta1);
-        db.collection("alertas_trafico").add(alerta2);
-        db.collection("alertas_trafico").add(alerta3);
-
-        Toast.makeText(requireContext(), "Datos de prueba inyectados a Firebase", Toast.LENGTH_SHORT).show();
     }
 }

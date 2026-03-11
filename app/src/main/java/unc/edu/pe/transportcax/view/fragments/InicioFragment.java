@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,7 +44,6 @@ import unc.edu.pe.transportcax.view.adapters.RutaMiniAdapter;
 
 public class InicioFragment extends Fragment {
 
-    // --- VARIABLES ORIGINALES ---
     private EditText etOrigen, etDestino;
     private TextView tvAgregarEscala;
     private Button btnPlanificar;
@@ -53,8 +53,8 @@ public class InicioFragment extends Fragment {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private Location miUbicacionActual;
 
-    // --- VARIABLES NUEVAS (DASHBOARD) ---
     private RecyclerView recyclerRutasInicio, recyclerAlertasInicio;
+    private ProgressBar pbRutasInicio, pbAlertasInicio;
     private TextView tvTituloRutasInicio;
     private FirebaseFirestore db;
 
@@ -68,16 +68,16 @@ public class InicioFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // ENLACES ORIGINALES
         etOrigen = view.findViewById(R.id.etOrigen);
         etDestino = view.findViewById(R.id.etDestino);
         contenedorDestinosDinamicos = view.findViewById(R.id.contenedorDestinosDinamicos);
         tvAgregarEscala = view.findViewById(R.id.tvAgregarEscala);
         btnPlanificar = view.findViewById(R.id.btnPlanificar);
 
-        // ENLACES NUEVOS (DASHBOARD)
         db = FirebaseFirestore.getInstance();
         tvTituloRutasInicio = view.findViewById(R.id.tvTituloRutasInicio);
+        pbRutasInicio = view.findViewById(R.id.pbRutasInicio);
+        pbAlertasInicio = view.findViewById(R.id.pbAlertasInicio);
 
         recyclerRutasInicio = view.findViewById(R.id.recyclerRutasInicio);
         if (recyclerRutasInicio != null) {
@@ -89,28 +89,22 @@ public class InicioFragment extends Fragment {
             recyclerAlertasInicio.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false));
         }
 
-        // CARGAMOS LA INFORMACIÓN DEL DASHBOARD
         cargarRutasInteligentes();
         cargarAlertasRecientes();
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         solicitarPermisosDeUbicacion();
 
-        // 1. Lógica para inyectar N campos dinámicos CON VALIDACIÓN (INTACTA)
         tvAgregarEscala.setOnClickListener(v -> {
             boolean puedeAgregar = true;
-
-            // Verificamos si ya hay campos dinámicos creados
             int cantidadDinamicos = contenedorDestinosDinamicos.getChildCount();
 
             if (cantidadDinamicos == 0) {
-                // Si no hay dinámicos, validamos el Destino 1 (el principal)
                 if (etDestino.getText().toString().trim().isEmpty()) {
                     puedeAgregar = false;
-                    etDestino.requestFocus(); // Hacemos que parpadee el cursor ahí
+                    etDestino.requestFocus();
                 }
             } else {
-                // Si ya hay dinámicos, validamos el ÚLTIMO de la lista
                 View ultimaVistaHija = contenedorDestinosDinamicos.getChildAt(cantidadDinamicos - 1);
                 EditText etUltimoDestino = ultimaVistaHija.findViewById(R.id.etDestinoDinamico);
 
@@ -120,7 +114,6 @@ public class InicioFragment extends Fragment {
                 }
             }
 
-            // Actuamos según la validación
             if (puedeAgregar) {
                 agregarCampoDestinoDinamico();
             } else {
@@ -128,7 +121,6 @@ public class InicioFragment extends Fragment {
             }
         });
 
-        // 2. Empaquetar TODOS los destinos (INTACTA)
         btnPlanificar.setOnClickListener(v -> {
             if (miUbicacionActual == null) {
                 Toast.makeText(requireContext(), "Buscando tu ubicación GPS...", Toast.LENGTH_SHORT).show();
@@ -141,11 +133,9 @@ public class InicioFragment extends Fragment {
                 return;
             }
 
-            // Guardamos el destino 1
             ArrayList<String> listaDestinos = new ArrayList<>();
             listaDestinos.add(destPrincipal);
 
-            // Bucle mágico: Leemos todos los destinos extra que el usuario haya agregado
             for (int i = 0; i < contenedorDestinosDinamicos.getChildCount(); i++) {
                 View vistaHija = contenedorDestinosDinamicos.getChildAt(i);
                 EditText etDinamico = vistaHija.findViewById(R.id.etDestinoDinamico);
@@ -156,7 +146,6 @@ public class InicioFragment extends Fragment {
                 }
             }
 
-            // Viajamos al mapa enviando la lista completa
             Bundle bundle = new Bundle();
             bundle.putStringArrayList("LISTA_DESTINOS", listaDestinos);
             bundle.putDouble("ORIGEN_LAT", miUbicacionActual.getLatitude());
@@ -173,15 +162,10 @@ public class InicioFragment extends Fragment {
         });
     }
 
-    // =======================================================
-    // NUEVOS MÉTODOS DEL DASHBOARD
-    // =======================================================
-
     private void cargarRutasInteligentes() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user != null) {
-            // Lógica inteligente: Si está registrado, buscamos si tiene rutas frecuentes
             db.collection("historial_rutas")
                     .whereEqualTo("usuarioId", user.getUid())
                     .get()
@@ -189,7 +173,6 @@ public class InicioFragment extends Fragment {
                         if (tvTituloRutasInicio != null) {
                             if (!query.isEmpty() && query.size() > 0) {
                                 tvTituloRutasInicio.setText("Tus rutas frecuentes");
-                                // (Futuro: cargar aquí las rutas frecuentes del usuario)
                                 cargarRutasPopularesGlobales();
                             } else {
                                 tvTituloRutasInicio.setText("Rutas más populares");
@@ -202,7 +185,6 @@ public class InicioFragment extends Fragment {
                         cargarRutasPopularesGlobales();
                     });
         } else {
-            // Usuario invitado: Solo sugerencias globales
             if(tvTituloRutasInicio != null) tvTituloRutasInicio.setText("Sugerencias para ti");
             cargarRutasPopularesGlobales();
         }
@@ -221,7 +203,13 @@ public class InicioFragment extends Fragment {
                     }
                     RutaMiniAdapter miniAdapter = new RutaMiniAdapter(rutasSugeridas);
                     recyclerRutasInicio.setAdapter(miniAdapter);
+
+                    if (pbRutasInicio != null) pbRutasInicio.setVisibility(View.GONE);
+                    recyclerRutasInicio.setVisibility(View.VISIBLE);
                     recyclerRutasInicio.scheduleLayoutAnimation();
+                })
+                .addOnFailureListener(e -> {
+                    if (pbRutasInicio != null) pbRutasInicio.setVisibility(View.GONE);
                 });
     }
 
@@ -232,7 +220,10 @@ public class InicioFragment extends Fragment {
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(3)
                 .addSnapshotListener((value, error) -> {
-                    if (error != null) return;
+                    if (error != null) {
+                        if (pbAlertasInicio != null) pbAlertasInicio.setVisibility(View.GONE);
+                        return;
+                    }
 
                     if (value != null && !value.isEmpty()) {
                         List<Alerta> ultimasAlertas = new ArrayList<>();
@@ -240,27 +231,24 @@ public class InicioFragment extends Fragment {
                             ultimasAlertas.add(doc.toObject(Alerta.class));
                         }
 
-                        // CORRECCIÓN: Ahora solo le pasamos 1 argumento (la lista), tal como espera tu adaptador.
                         AlertaAdapter alertaAdapter = new AlertaAdapter(ultimasAlertas);
                         recyclerAlertasInicio.setAdapter(alertaAdapter);
+
+                        if (pbAlertasInicio != null) pbAlertasInicio.setVisibility(View.GONE);
+                        recyclerAlertasInicio.setVisibility(View.VISIBLE);
+                    } else {
+                        if (pbAlertasInicio != null) pbAlertasInicio.setVisibility(View.GONE);
                     }
                 });
     }
 
-    // Método para inyectar visualmente un nuevo destino
     private void agregarCampoDestinoDinamico() {
-        // Inflamos (creamos) la vista desde el XML
         View vistaNueva = getLayoutInflater().inflate(R.layout.item_destino_dinamico, contenedorDestinosDinamicos, false);
-
-        // Configuramos el botón de la "X" para que se elimine a sí mismo
         ImageButton btnQuitar = vistaNueva.findViewById(R.id.btnQuitarDestino);
         btnQuitar.setOnClickListener(v -> contenedorDestinosDinamicos.removeView(vistaNueva));
-
-        // Lo agregamos al contenedor de la pantalla principal
         contenedorDestinosDinamicos.addView(vistaNueva);
     }
 
-    // LÓGICA DE GPS Y GEOCODIFICACIÓN (CALLES REALES
     private void solicitarPermisosDeUbicacion() {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
@@ -274,26 +262,19 @@ public class InicioFragment extends Fragment {
             fusedLocationClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
                 if (location != null) {
                     miUbicacionActual = location;
-
-                    // Magia de Geocodificación: Convertir GPS a Calle
                     Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
                     try {
                         List<Address> direcciones = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                         if (direcciones != null && !direcciones.isEmpty()) {
-                            // Extraemos el nombre de la calle/avenida
                             String direccionReal = direcciones.get(0).getAddressLine(0);
-
-                            // Limpiamos el texto (a veces dice "Cajamarca, Peru", lo dejamos más limpio)
                             if (direccionReal.contains(",")) {
                                 direccionReal = direccionReal.split(",")[0];
                             }
-
                             etOrigen.setText("📍 " + direccionReal);
                         } else {
                             etOrigen.setText("📍 Ubicación detectada");
                         }
                     } catch (Exception e) {
-                        // Si falla el internet, mostramos las coordenadas puras
                         etOrigen.setText("📍 Coordenadas: " + location.getLatitude() + ", " + location.getLongitude());
                     }
                 } else {

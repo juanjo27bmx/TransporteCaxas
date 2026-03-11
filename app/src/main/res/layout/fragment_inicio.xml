@@ -168,12 +168,27 @@
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerRutasInicio"
+                    <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipToPadding="false"
-                        android:paddingHorizontal="16dp" />
+                        android:layout_height="wrap_content">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerRutasInicio"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clipToPadding="false"
+                            android:paddingHorizontal="16dp"
+                            android:visibility="gone" />
+
+                        <ProgressBar
+                            android:id="@+id/pbRutasInicio"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_gravity="center"
+                            android:layout_margin="20dp"
+                            android:indeterminateTint="#1A73E8" />
+                    </FrameLayout>
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -201,13 +216,28 @@
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerAlertasInicio"
+                    <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:nestedScrollingEnabled="false"
-                        android:clipToPadding="false"
-                        android:paddingHorizontal="20dp" />
+                        android:layout_height="wrap_content">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerAlertasInicio"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"
+                            android:clipToPadding="false"
+                            android:paddingHorizontal="20dp"
+                            android:visibility="gone" />
+
+                        <ProgressBar
+                            android:id="@+id/pbAlertasInicio"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_gravity="center"
+                            android:layout_margin="20dp"
+                            android:indeterminateTint="#1A73E8" />
+                    </FrameLayout>
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
